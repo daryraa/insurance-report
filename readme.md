@@ -47,6 +47,27 @@ Tujuan dari proyek ini yang berfokus pada masing-masing pernyataan masalah di at
 * **Jawaban Pernyataan Masalah 3**
   Mengidentifikasi dan mengevaluasi fitur-fitur yang paling berpengaruh terhadap besaran biaya klaim, sehingga hasil ini dapat digunakan untuk merancang intervensi kesehatan preventif yang lebih efektif, khususnya bagi kelompok risiko tinggi.
 
+Untuk mencapai tujuan yang telah dijelaskan, proyek ini mengusulkan dua pendekatan solusi yang dapat diukur secara objektif dengan metrik evaluasi seperti MAE, RMSE, dan R².
+
+#### Solution Statement 1: Evaluasi Beberapa Algoritma Regresi
+
+Proyek ini menggunakan tiga algoritma berbeda:
+
+* **Linear Regression** sebagai baseline model yang sederhana dan cepat.
+* **Random Forest Regression** sebagai model ensemble berbasis pohon untuk menangani relasi non-linear.
+* **Gradient Boosting Regression** sebagai model yang menggabungkan banyak pohon kecil untuk meningkatkan akurasi.
+
+Setiap algoritma dibandingkan berdasarkan performanya menggunakan metrik evaluasi yang sama. Pendekatan ini membantu dalam mengidentifikasi model terbaik dengan performa paling stabil dan akurat.
+
+#### Solution Statement 2: Eksperimen Subset Fitur
+
+Model juga dievaluasi dengan menggunakan tiga subset fitur berbeda:
+
+* **Fitur numerik saja**: untuk melihat performa dasar dari fitur kuantitatif.
+* **Fitur dengan korelasi kuat**: untuk menyederhanakan model tanpa mengorbankan banyak informasi.
+* **Seluruh fitur hasil encoding**: untuk memanfaatkan semua informasi termasuk kategorikal.
+
+
 ## Data Understanding
 
 Dataset diambil dari [kaggle.com/mirichoi0218/insurance](https://www.kaggle.com/datasets/mirichoi0218/insurance), terdiri dari 1338 sampel dengan fitur-fitur berikut:
@@ -129,19 +150,57 @@ Berdasarkan evaluasi terhadap ketiga subset fitur, Gradient Boosting Regressor d
 
 Metrik evaluasi yang digunakan meliputi:
 
-1. Mean Absolute Error (MAE): rata-rata selisih absolut antara nilai prediksi dan nilai aktual
-2. Root Mean Squared Error (RMSE): akar dari rata-rata kuadrat selisih antara nilai prediksi dan aktual, sensitif terhadap outlier
-3. R² Score (Koefisien Determinasi): proporsi variasi target yang dapat dijelaskan oleh model
+Evaluasi dilakukan untuk menilai sejauh mana model dapat memprediksi nilai biaya klaim asuransi secara akurat. Tiga metrik utama digunakan dalam evaluasi model regresi ini:
 
-| Fitur Digunakan   | Model             | MAE (↓)       | RMSE (↓)      | R² Score (↑) |
-| ----------------- | ----------------- | ------------- | ------------- | ------------ |
-| **Semua Fitur**   | Gradient Boosting | **2351.95**   | **3851.46**   | **0.9040**   |
-| **Numerik Saja**  | Gradient Boosting | 9048.54       | 11925.54      | 0.0798       |
-| **Korelasi Kuat** | Gradient Boosting | 9048.54       | 11925.54      | 0.0798       |
+1. **Mean Absolute Error (MAE)**
+   MAE mengukur rata-rata absolut dari perbedaan antara nilai aktual dan nilai prediksi. Metrik ini memberikan gambaran umum seberapa besar kesalahan prediksi dalam satuan yang sama dengan target (yaitu, biaya klaim). Semakin kecil nilai MAE, semakin baik model dalam melakukan prediksi.
 
-Evaluasi dilakukan pada masing-masing kombinasi fitur dan algoritma. Gradient Boosting dengan seluruh fitur menunjukkan performa terbaik dengan nilai MAE sebesar 2351.95, RMSE sebesar 3851.46, dan R² sebesar 0.9040. Ini berarti model dapat menjelaskan lebih dari 90% variasi pada data biaya klaim asuransi.
+   Formula:
+   MAE = (1/n) \* Σ|y\_i - ŷ\_i|
 
-Sebaliknya, model yang hanya menggunakan fitur numerik atau fitur dengan korelasi tinggi menghasilkan performa yang jauh lebih rendah, menunjukkan bahwa keberadaan fitur kategorikal dan hasil encoding memberikan kontribusi signifikan terhadap akurasi model.
+2. **Root Mean Squared Error (RMSE)**
+   RMSE mengukur akar dari rata-rata kuadrat kesalahan antara nilai aktual dan prediksi. RMSE lebih sensitif terhadap outlier karena kesalahan yang lebih besar akan diberi bobot lebih besar. Ini berguna untuk mengidentifikasi model yang memiliki kesalahan besar pada sebagian data.
+
+   Formula:
+   RMSE = sqrt((1/n) \* Σ(y\_i - ŷ\_i)^2)
+
+3. **R² Score (Koefisien Determinasi)**
+   R² mengukur proporsi variansi dari target yang dapat dijelaskan oleh model. Nilai R² berkisar antara 0 dan 1, di mana nilai mendekati 1 menunjukkan model yang sangat baik dalam menjelaskan variansi data.
+
+   Formula:
+   R² = 1 - (Σ(y\_i - ŷ\_i)^2 / Σ(y\_i - ȳ)^2)
+
+Formula metrik:
+
+* MAE = $\frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|$
+* RMSE = $\sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}$
+* R² = $1 - \frac{\sum (y_i - \hat{y}_i)^2}{\sum (y_i - \bar{y})^2}$
+
+Evaluasi dilakukan terhadap tiga algoritma regresi (Linear Regression, Random Forest, dan Gradient Boosting) dalam tiga skenario subset fitur: seluruh fitur, hanya fitur numerik, dan fitur dengan korelasi kuat. Tabel berikut merangkum hasil evaluasi berdasarkan metrik MAE, RMSE, dan R² Score:
+
+| Subset Fitur       | Model             | MAE     | RMSE     | R² Score |
+| ------------------ | ----------------- | ------- | -------- | -------- |
+| All Features       | Linear Regression | 3885.65 | 5560.28  | 0.800    |
+|                    | Random Forest     | 2570.05 | 4228.55  | 0.884    |
+|                    | Gradient Boosting | 2351.95 | 3851.46  | 0.904    |
+| Numerical Only     | Linear Regression | 9119.55 | 11641.19 | 0.123    |
+|                    | Random Forest     | 9409.29 | 12539.38 | -0.017   |
+|                    | Gradient Boosting | 9048.54 | 11925.54 | 0.080    |
+| Strong Correlation | Linear Regression | 9119.55 | 11641.19 | 0.123    |
+|                    | Random Forest     | 9409.29 | 12539.38 | -0.017   |
+|                    | Gradient Boosting | 9048.54 | 11925.54 | 0.080    |
+
+Dari hasil tersebut, dapat disimpulkan bahwa kombinasi Gradient Boosting Regressor dengan seluruh fitur memberikan performa terbaik, menjadikannya model pilihan utama dalam proyek ini. Model ini berhasil menjelaskan sekitar 90% variasi data target (charges) dengan kesalahan prediksi rata-rata (MAE) hanya sekitar 2.351 dan RMSE sebesar 3.851. Model lain serta skenario subset fitur lainnya menunjukkan performa yang jauh lebih rendah dan kurang akurat.
+
+Setiap model diuji menggunakan Linear Regression, Random Forest, dan Gradient Boosting. Dari hasil evaluasi, Gradient Boosting dengan seluruh fitur memberikan performa terbaik dengan hasil sebagai berikut:
+
+* MAE: 2351.95
+* RMSE: 3851.46
+* R² Score: 0.9040
+
+Hasil tersebut menunjukkan bahwa model dapat menjelaskan lebih dari 90% variasi pada data target dan memiliki rata-rata kesalahan absolut yang relatif kecil terhadap nilai biaya klaim.
+
+Sebaliknya, ketika model hanya menggunakan fitur numerik atau fitur dengan korelasi kuat, hasil evaluasi menunjukkan penurunan performa signifikan. Ini menunjukkan bahwa fitur kategorikal seperti 'smoker' dan hasil dari proses encoding sangat penting dalam prediksi biaya klaim.
 
 
 **Referensi:**
@@ -150,4 +209,5 @@ Sebaliknya, model yang hanya menggunakan fitur numerik atau fitur dengan korelas
 * Utami, M., & Arifin, S. (2022). Analisis biaya klaim asuransi kesehatan berdasarkan data demografi. *Jurnal Statistik dan Data*, 10(4), 45–58.
 * Benson, L., & Campbell, A. (2023). Machine learning methods for health insurance premium prediction. *Journal of Insurance & Data Science*, 15(2), 77–95.
 * Bramastya, R., & Sari, T. (2024). Financial sustainability of Indonesia’s national health insurance system. *Health Policy and Planning*, 39(1), 86–98.
+
 
